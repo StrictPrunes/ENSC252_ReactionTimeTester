@@ -12,7 +12,7 @@ Use ieee.numeric_std.all;
 ENTITY reactionStart IS
 PORT (e : in std_logic;
 		clock : in std_logic;
-		plrIn : in std_logic;
+		running : in std_logic;
 		plrOut : out std_logic_vector(3 downto 0));
 
 END reactionStart;
@@ -27,20 +27,11 @@ PORT (e0 : in std_logic;
 
 END COMPONENT;
 
-	 signal stop : std_logic := '0';
 	 signal tempBCD : std_logic_vector(3 downto 0);
 BEGIN
 
-process (plrIn)
-begin
-	if (plrIn = '0' OR e = '0') then
-		stop <= '1';
-	else
-		stop <= '0';
-	end if;
-end process;
 
-u2: BCDCount PORT MAP(stop, '0', clock, tempBCD);
+u2: BCDCount PORT MAP(running, not running, clock, tempBCD);
 plrOut <= tempBCD;
 
 

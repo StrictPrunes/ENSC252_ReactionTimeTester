@@ -15,6 +15,7 @@ PORT (nextState : in std_logic;
 		hardReset : in std_logic;
 		softReset : in std_logic;
 		LED : out std_logic_vector(5 downto 0);
+		running : out std_logic;
 		currPLr : out std_logic_vector(1 downto 0);
 		plr1 : out std_logic_vector(3 downto 0);
 		plr2 : out std_logic_vector(3 downto 0));
@@ -44,11 +45,13 @@ BEGIN
 					y <= S0;
 					currPlr <= "01";
 					plr1 <= "1111";
+					running <= '0';
 					LED(5 downto 1) <= "00000";
 					LED(0) <= '1';
 				else
 					y <= S1;
 					currPlr <= "01";
+					running <= '1';
 					LED(0) <= '0';
 					LED(1) <= '1';
 				end if;
@@ -57,12 +60,14 @@ BEGIN
 					y <= S0;
 					currPlr <= "01";
 					plr1 <= "1111";
+					running <= '0';
 					LED(5 downto 1) <= "00000";
 					LED(0) <= '1';
 				else
 					y <= S2;
 					currPlr <= "01";
 					plr1 <= BCDIn;
+					running <= '0';
 					LED(1 downto 0) <= "00";
 					LED(2) <= '1';
 					
@@ -72,11 +77,13 @@ BEGIN
 					y <= S0;
 					currPlr <= "01";
 					plr1 <= "1111";
+					running <= '0';
 					LED(5 downto 1) <= "00000";
 					LED(0) <= '1';
 				else
 					y <= S3;
 					currPlr <= "10";
+					running <= '0';
 					LED(2 downto 0) <= "000";
 					LED(3) <= '1';
 				end if;
@@ -85,12 +92,14 @@ BEGIN
 					y <= S3;
 					currPlr <= "10";
 					plr2 <= "1111";
+					running <= '0';
 					LED(2 downto 0) <= "000";
 					LED(3) <= '1';
 					LED(5 downto 4) <= "00";
 				else
 					y <= S4;
 					currPlr <= "10";
+					running <= '1';
 					LED(3 downto 0) <= "0000";
 					LED(4) <= '1';
 				end if;
@@ -100,6 +109,7 @@ BEGIN
 					y <= S3;
 					currPlr <= "10";
 					plr2 <= "1111";
+					running <= '0';
 					LED(2 downto 0) <= "000";
 					LED(3) <= '1';
 					LED(5 downto 4) <= "00";
@@ -107,6 +117,7 @@ BEGIN
 					y <= S5;
 					currPlr <= "10";
 					plr2 <= BCDIn;
+					running <= '0';
 					LED(4 downto 0) <= "00000";
 					LED(5) <= '1';
 				end if;
@@ -115,14 +126,16 @@ BEGIN
 					y <= S3;
 					currPlr <= "10";
 					plr2 <= "1111";
+					running <= '0';
 					LED(2 downto 0) <= "000";
 					LED(3) <= '1';
 					LED(5 downto 4) <= "00";
 				else
 					y <= S0;
-					currPlr <= "10";
+					currPlr <= "01";
 					plr1 <= "1111";
 					plr2 <= "1111";
+					running <= '0';
 					LED(5 downto 1) <= "00000";
 					LED(0) <= '1';
 				end if;
