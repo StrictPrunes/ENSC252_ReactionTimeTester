@@ -11,17 +11,23 @@ PORT (clock : in std_logic;
 END PreScale;
 
 ARCHITECTURE logicFunc OF PreScale IS
-	 signal acc : unsigned(19 downto 0) := "00000000000000000000";
+	 signal acc : unsigned(49 downto 0) := (others => '0');
 BEGIN
 
 
 process(clock, acc)
 begin
 	if rising_edge(clock) then
-		acc <= acc + 1;
+		if speed = "001" then
+			acc <= acc + 1;
+		elsif speed = "010" then
+			acc <= acc + 2;
+		elsif speed = "100" then
+			acc <= acc + 3;
+		end if;
 	end if;
 end process;
 
-f <= std_logic(acc(19));
+f <= std_logic(acc(49));
 
 END logicFunc;

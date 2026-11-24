@@ -63,7 +63,7 @@ SIGNAL y : State_type ;
 signal clk, start : std_logic := '0';
 signal currentPlr : std_logic_vector(1 downto 0) := "00";
 signal speed : std_logic_vector(2 downto 0) := "000";
-signal tHEX0, plrOut1, plrOut2: std_logic_vector(3 downto 0) := "0000";
+signal tHEX0, plrOut1, plrOut2, randNum, win: std_logic_vector(3 downto 0) := "0000";
 BEGIN
 
 process(SW(9))
@@ -75,6 +75,7 @@ begin
 	end if;
 end process;
 
+randNum <= "0100";
 u1: getSpeed PORT MAP(not start, SW(2 downto 0), KEY(3), speed);
 u2: PreScale PORT MAP(CLOCK_50, speed, clk);
 u3: plrStates PORT MAP(KEY(0), tHEX0, SW(8), SW(7), LEDR(5 downto 0), currentPlr, plrOut1, plrOut2);
@@ -83,7 +84,7 @@ u4: reactionStart PORT MAP(start, clk, KEY(0), tHEX0);
 mapHex0: SegDecoder PORT MAP(tHEX0, HEX0); --increasing number
 --mapHex1: SegDecoder PORT MAP(randNum, HEX1); --goal
 mapHex3: SegDecoder PORT MAP(plrOut1, HEX3); --plr1 stopped num
-mapHex2: SegDecoder PORT MAP(plrOut1, HEX2); --plr2 stopped num
+mapHex2: SegDecoder PORT MAP(plrOut2, HEX2); --plr2 stopped num
 --mapHex4: SegDecoder PORT MAP(win, HEX4); --winning plr
 mapHex5: SegDecoder PORT MAP("00" & currentPlr, HEX5); --current plr
 
