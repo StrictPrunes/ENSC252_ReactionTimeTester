@@ -5,41 +5,94 @@
 -- Responsibility: The named authors are responsible for this code
 -- and can explain its design, implementation, and verification.
 -- Adapted material: None
-LIBRARY ieee;
-USE ieee.std_logic_1164.all;
-USE ieee.numeric_std.all;
+library ieee;
+use ieee.std_logic_1164.all;
 
-ENTITY Fcount_tb is
-END Fcount_tb;
+entity speedGen_tb is
+end speedGen_tb;
 
-ARCHITECTURE Behaviour of Fcount_tb is
-COMPONENT Fcount IS --the component we would like to test
-	PORT (clock, reset : in std_logic;
-		D : in std_logic_vector(3 downto 0);
-		f : out unsigned(5 downto 0));
-	END COMPONENT;
+architecture behavior of speedGen_tb is
 
-	--for clock generation
-	constant clk_hz : integer := 50e6; --f = 50 Mhz clock
-	constant clk_period : time := 1 sec / clk_hz; --1/f = T = 20 ns period
+    component getSpeed is
+        port ( e           : in std_logic;
+               ins         : in std_logic_vector(2 downto 0);
+               mkSelection : in std_logic;
+               f           : out std_logic_vector(1 downto 0));
+    end component;
 
-	--DUT signals required
-	SIGNAL tb_f : UNSIGNED(5 downto 0);
-	SIGNAL tb_clock : std_logic := '1'; --DUT's clock input. Assign the clock a starting value for Modelsim
-	SIGNAL tb_reset : std_logic := '1';
-	SIGNAL tb_d : UNSIGNED(3 downto 0) := "0001";
-	
-	BEGIN
-	
-		DUT : Fcount
-		PORT MAP(tb_clock, tb_reset, STD_LOGIC_VECTOR(tb_d), tb_f);
+    signal en       : std_logic := '1';
+    signal switches : std_logic_vector(2 downto 0) := "000";
+    signal mkSel    : std_logic := '0';
+    signal f_out    : std_logic_vector(1 downto 0);
 
-		--Simple assignment statement that inverts the clock ever clk_period/2 to create 
-		--a constant clock signal for our simulations
-		tb_clock <= NOT tb_clock after clk_period / 2;
-		tb_reset <= NOT tb_reset after clk_period * 3;
-		tb_d <= tb_d + 1 after clk_period * 3;
-		
-		
+    constant EASY   : std_logic_vector(1 downto 0) := "01";
+    constant MEDIUM : std_logic_vector(1 downto 0) := "10";
+    constant HARD   : std_logic_vector(1 downto 0) := "11";
 
-END Behaviour;
+begin
+
+    UUT: getSpeed
+        port map ( e           => en,
+                   ins         => switches,
+                   mkSelection => mkSel,
+                   f           => f_out);
+
+    test_process : process
+    begin
+
+        -- t1: Easy speed
+        switches <= "001";
+        mkSel <= '0';
+        wait for 10 ns;
+        mkSel <= '1';
+        wait for 10 ns;
+
+        assert f_out = EASY
+            report "Easy selection failed" severity error;
+
+        -- t2: Medium speed
+        switches <= "010";
+        mkSel <= '0';
+        wait for 10 ns;
+        mkSel <= '1';
+        wait for 10 ns;
+
+        assert f_out = MEDIUM
+            report "Medium selection failed" severity error;
+
+        -- t3: Hard speed
+        switches <= "100";
+        mkSel <= '0';
+        wait for 10 ns;
+        mkSel <= '1';
+        wait for 10 ns;
+
+        assert f_out = HARD
+            report "Hard selection failed" severity error;
+
+        -- t4: Output should hold when selection is inactive
+        mkSel <= '0';
+        switches <= "001";
+        wait for 20 ns;
+
+        assert f_out = HARD
+            report "Output changed while selection was inactive" severity error;
+
+        -- t5: Output should hold when disabled
+        en <= '0';
+        switches <= "010";
+        mkSel <= '0';
+        wait for 10 ns;
+        mkSel <= '1';
+        wait for 10 ns;
+
+        assert f_out = HARD
+            report "Output changed while disabled" severity error;
+
+        report "TEST PASSED: All speedGen tests completed."
+            severity note;
+
+        wait;
+    end process;
+
+end architecture behavior;
