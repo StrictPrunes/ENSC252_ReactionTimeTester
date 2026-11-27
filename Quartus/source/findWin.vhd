@@ -1,34 +1,42 @@
--- File: reaction_timer_fsm.vhd
--- Group: XX
--- Authors: [names of members who wrote this file]
--- Purpose: [brief summary of this module or testbench]
+-- File: findWin.vhd
+-- Group: 36
+-- Authors: Gabriel Dryer, Jeromey Gong
+-- Purpose: computes the winner when in the 6th state of the fsm
 -- Responsibility: The named authors are responsible for this code
 -- and can explain its design, implementation, and verification.
--- Adapted material: [source and extent, or None]
+-- Adapted material: None
 library ieee;
 use ieee.std_logic_1164.all;
 Use ieee.numeric_std.all;
 
-ENTITY calcWin IS
+ENTITY findWin IS
 PORT (e : in std_logic;
-		ins : in std_logic_vector(2 downto 0);
-		mkSelection : in std_logic;
-		f : out std_logic_vector(2 downto 0) := "000");
+		goal : in std_logic_vector(3 downto 0);
+		plrOut1 : in std_logic_vector(3 downto 0);
+		plrOut2 : in std_logic_vector(3 downto 0);
+		win : out std_logic_vector(3 downto 0));
 
-END calcWin;
+END findWin;
 
-ARCHITECTURE logicFunc OF calcWin IS
-	 
+ARCHITECTURE logicFunc OF findWin IS
+		signal temp1, temp2 : unsigned(3 downto 0);
 BEGIN
 
-process (mkSelection)
+temp1 <= unsigned(plrOut1) - unsigned(goal) when unsigned(plrOut1) >= unsigned(goal) else unsigned(goal) - unsigned(plrOut1);
+temp2 <= unsigned(plrOut2) - unsigned(goal) when unsigned(plrOut2) >= unsigned(goal) else unsigned(goal) - unsigned(plrOut2);
+
+process(temp1, temp2)
 begin
-if (rising_edge(mkSelection) AND (ins = "001" OR ins = "010" OR ins = "100") AND e = '1') then
-	f <= ins;
+if e = '1' then
+	if temp1 < temp2 then
+		win <= "0001";
+	elsif temp2 < temp1 then
+		win <= "0010";
+	elsif temp1 = temp2 then
+		win <= "1101";
+	end if;
+else
+	win <= "1111";
 end if;
-
 end process;
-
-
-
 END logicFunc;

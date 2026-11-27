@@ -3,3 +3,6 @@ db
 incremental_db
 output_files
 *.zip
+*.qws
+Quartus/*.txt
+Quartus/simulation

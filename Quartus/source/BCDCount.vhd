@@ -1,4 +1,10 @@
--- Gabriel Dryer - 301652362; Jeromey Gong - 301656280; Joshua Po - 301639298
+-- File: BCDCount.vhd
+-- Group: 36
+-- Authors: Gabriel Dryer; Jeromey Gong; Joshua Po
+-- Purpose: Binary Coded Decimal counter; Instantiates Count4.vhd
+-- Responsibility: The named authors are responsible for this code
+-- and can explain its design, implementation, and verification.
+-- Adapted material: None
 library ieee;
 use ieee.std_logic_1164.all;
 Use ieee.numeric_std.all;

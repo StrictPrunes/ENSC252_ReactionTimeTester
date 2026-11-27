@@ -1,10 +1,10 @@
--- File: reaction_timer_fsm.vhd
--- Group: XX
--- Authors: [names of members who wrote this file]
--- Purpose: [brief summary of this module or testbench]
+-- File: reactionStart.vhd
+-- Group: 36
+-- Authors: Gabriel Dryer; Jeromey Gong; Joshua Po
+-- Purpose: Starts the BCD counter when running is 1; clears when not running
 -- Responsibility: The named authors are responsible for this code
 -- and can explain its design, implementation, and verification.
--- Adapted material: [source and extent, or None]
+-- Adapted material: None
 library ieee;
 use ieee.std_logic_1164.all;
 Use ieee.numeric_std.all;

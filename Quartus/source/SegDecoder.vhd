@@ -1,4 +1,10 @@
--- Gabriel Dryer - 301652362; Jeromey Gong - 301656280; Joshua Po - 301639298
+-- File: SegDecoder.vhd
+-- Group: 36
+-- Authors: Gabriel Dryer; Jeromey Gong; Joshua Po
+-- Purpose: Converts a 4 bit binary number into a 7 bit to display the corresponding hexadecimal value on a HEX
+-- Responsibility: The named authors are responsible for this code
+-- and can explain its design, implementation, and verification.
+-- Adapted material: None
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 ENTITY SegDecoder IS
