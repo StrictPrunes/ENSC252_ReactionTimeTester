@@ -1,45 +1,98 @@
--- File: BCDCount.vhd
+-- File: BCDWraparound_tb.vhd
 -- Group: 36
 -- Authors: Gabriel Dryer; Jeromey Gong; Joshua Po
--- Purpose: Binary Coded Decimal counter; Instantiates Count4.vhd
+-- Purpose: Verifies the BCD sequence counting, enable, clear, and 9-to-0 wraparound.
 -- Responsibility: The named authors are responsible for this code
 -- and can explain its design, implementation, and verification.
 -- Adapted material: None
-LIBRARY ieee;
-USE ieee.std_logic_1164.all;
-USE ieee.numeric_std.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
-ENTITY Fcount_tb is
-END Fcount_tb;
+entity BCDWraparound_tb is
+end BCDWraparound_tb;
 
-ARCHITECTURE Behaviour of Fcount_tb is
-COMPONENT Fcount IS --the component we would like to test
-	PORT (clock, reset : in std_logic;
-		D : in std_logic_vector(3 downto 0);
-		f : out unsigned(5 downto 0));
-	END COMPONENT;
+architecture behavior of BCDWraparound_tb is
 
-	--for clock generation
-	constant clk_hz : integer := 50e6; --f = 50 Mhz clock
-	constant clk_period : time := 1 sec / clk_hz; --1/f = T = 20 ns period
+    component BCDCount is
+        port (e0    : in std_logic;
+              clear : in std_logic;
+              clock : in std_logic;
+              BCD0  : out std_logic_vector(3 downto 0));
+    end component;
 
-	--DUT signals required
-	SIGNAL tb_f : UNSIGNED(5 downto 0);
-	SIGNAL tb_clock : std_logic := '1'; --DUT's clock input. Assign the clock a starting value for Modelsim
-	SIGNAL tb_reset : std_logic := '1';
-	SIGNAL tb_d : UNSIGNED(3 downto 0) := "0001";
-	
-	BEGIN
-	
-		DUT : Fcount
-		PORT MAP(tb_clock, tb_reset, STD_LOGIC_VECTOR(tb_d), tb_f);
+    signal clk : std_logic := '0';
+    signal clr : std_logic := '0';
+    signal en  : std_logic := '0';
+    signal bcd : std_logic_vector(3 downto 0);
+    constant clk_period : time := 20 ns;
+begin
+    UUT: BCDCount port map ( e0    => en,
+							 clear => clr,
+                             clock => clk,
+                             BCD0  => bcd);
+    -- clock generation
+    clk_process : process
+    begin
+        clk <= not clk;
+        wait for clk_period / 2;
+    end process;
+    -- test process
+    test_process : process begin
+        -- t1: clear counter
+        clr <= '1';
+        en <= '0';
+        wait for clk_period * 2;
+        clr <= '0';
+        wait until rising_edge(clk);
+        wait for 2 ns;
+        assert bcd = "0000"
+            report "Clear failed" severity error;
+        -- t2: counter stays at 0 when disabled
+        wait for clk_period * 5;
+        assert bcd = "0000"
+            report "Counter changed while disabled" severity error;
+        -- t3: count from 1 to 9
+        en <= '1';
+        for i in 1 to 9 loop
+            wait until rising_edge(clk);
+            wait for 2 ns;
+            assert to_integer(unsigned(bcd)) = i
+                report "Incorrect counting sequence" severity error;
+        end loop;
+        -- t4: wrap from 9 back to 0
+        wait until rising_edge(clk);
+        wait for 2 ns;
+        assert bcd = "0000"
+            report "Wraparound failed" severity error;
+        -- t5: count two more times
+        wait until rising_edge(clk);
+        wait until rising_edge(clk);
+        wait for 2 ns;
+        assert bcd = "0010"
+            report "Expected count of 2" severity error;
+        -- t6: disable and check that count holds
+        en <= '0';
+        wait for clk_period * 5;
+        assert bcd = "0010"
+            report "Counter did not hold its value" severity error;
+        -- enable and check next count
+        en <= '1';
+        wait until rising_edge(clk);
+        wait for 2 ns;
+        assert bcd = "0011"
+            report "Counter did not advance to 3" severity error;
+        -- t7: clear while counting
+        wait until rising_edge(clk);
+        wait until rising_edge(clk);
+        clr <= '1';
+        wait for clk_period * 2;
+        clr <= '0';
+        wait for 2 ns;
+        assert bcd = "0000"
+            report "Mid-count clear failed" severity error;
+        report "TEST PASSED: All BCD tests completed." severity note;
+        wait;
+    end process;
 
-		--Simple assignment statement that inverts the clock ever clk_period/2 to create 
-		--a constant clock signal for our simulations
-		tb_clock <= NOT tb_clock after clk_period / 2;
-		tb_reset <= NOT tb_reset after clk_period * 3;
-		tb_d <= tb_d + 1 after clk_period * 3;
-		
-		
-
-END Behaviour;
+end architecture behavior;
