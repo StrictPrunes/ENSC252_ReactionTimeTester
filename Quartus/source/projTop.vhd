@@ -29,7 +29,7 @@ COMPONENT getSpeed IS
 PORT (e : in std_logic;
 		ins : in std_logic_vector(2 downto 0);
 		mkSelection : in std_logic;
-		f : out std_logic_vector(1 downto 0) := "00");
+		f : out std_logic_vector(1 downto 0) := "01");
 
 END COMPONENT;
 
@@ -47,7 +47,8 @@ Port ( D : in std_logic_vector( 3 downto 0 );
 END COMPONENT;
 
 COMPONENT plrStates IS
-PORT (nextState : in std_logic;
+PORT (e : in std_logic_vector(2 downto 0);
+		nextState : in std_logic;
 		BCDIn : in std_logic_vector(3 downto 0);
 		hardReset : in std_logic;
 		softReset : in std_logic;
@@ -87,7 +88,7 @@ BEGIN
 u6: getRandNum PORT MAP(state(0) OR SW(1), CLOCK_50, randNum);
 u1: getSpeed PORT MAP(state(0), SW(9 downto 7), KEY(0), speed); --left 3 switches to select speed, left most key to save selection
 u2: PreScale PORT MAP(CLOCK_50, speed, clk);
-u3: plrStates PORT MAP(KEY(0), tempPlrOut, SW(1), SW(0), state, startTest, currentPlr, plrOut1, plrOut2); 
+u3: plrStates PORT MAP(SW(9 downto 7), KEY(0), tempPlrOut, SW(1), SW(0), state, startTest, currentPlr, plrOut1, plrOut2); 
 --KEY(0) proceeds to next state, SW(2) hard reset, SW(1) soft reset, current state displayed on leds
 u4: reactionStart PORT MAP(enable, clk, startTest, tempPlrOut);
 u5: findWin PORT MAP(state(7), randNum, plrOut1, plrOut2, win);

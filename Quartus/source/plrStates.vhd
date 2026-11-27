@@ -10,7 +10,8 @@ use ieee.std_logic_1164.all;
 Use ieee.numeric_std.all;
 
 ENTITY plrStates IS
-PORT (nextState : in std_logic;
+PORT (e : in std_logic_vector(2 downto 0);
+		nextState : in std_logic;
 		BCDIn : in std_logic_vector(3 downto 0);
 		hardReset : in std_logic;
 		softReset : in std_logic;
@@ -39,17 +40,21 @@ BEGIN
 		running <= '0';
 		LED(7 downto 1) <= "0000000";
 		LED(0) <= '1';
-	ELSIF rising_edge(nextState) then
+	ELSIF rising_edge(nextState)then
 		CASE y IS
 			WHEN S0 =>
-				y <= S1;
-				currPlr <= "01";
-				plr1 <= "1111";
-				plr2 <= "1111";
-				running <= '0';
-				LED(7 downto 2) <= "000000";
-				LED(0) <= '0';
-				LED(1) <= '1';
+				if (e = "001" OR e = "010" OR e = "100") then
+					y <= S1;
+					currPlr <= "01";
+					plr1 <= "1111";
+					plr2 <= "1111";
+					running <= '0';
+					LED(7 downto 2) <= "000000";
+					LED(0) <= '0';
+					LED(1) <= '1';
+				else 
+					y <= S0;
+				end if;
 			WHEN S1 =>
 				y <= S2;
 				currPlr <= "01";

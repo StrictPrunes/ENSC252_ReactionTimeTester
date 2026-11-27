@@ -17,18 +17,22 @@ PORT (e : in std_logic;
 END getRandNum;
 
 ARCHITECTURE logicFunc OF getRandNum IS
-		signal temp : unsigned(3 downto 0);
+		signal temp : unsigned(3 downto 0) := "0000";
 BEGIN
 
 process(e, clock, temp)
 begin
-	if e = '1' AND rising_edge(clock) AND temp = "1001" then
+	if rising_edge(clock) AND temp = "1001" then
 		temp <= "0000";
-	elsif rising_edge(clock) AND e = '1' then
+	elsif rising_edge(clock) then
 		temp <= temp +1;
+	end if;
+	
+	if e = '1' then
+		rand <= std_logic_vector(temp);
 	end if;
 end process;
 
-rand <= std_logic_vector(temp);
+
 
 END logicFunc;

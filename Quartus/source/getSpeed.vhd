@@ -13,7 +13,7 @@ ENTITY getSpeed IS
 PORT (e : in std_logic;
 		ins : in std_logic_vector(2 downto 0);
 		mkSelection : in std_logic;
-		f : out std_logic_vector(1 downto 0) := "00");
+		f : out std_logic_vector(1 downto 0) := "01");
 
 END getSpeed;
 
@@ -21,9 +21,9 @@ ARCHITECTURE logicFunc OF getSpeed IS
 	 
 BEGIN
 
-process (mkSelection)
+process (mkSelection, e, ins)
 begin
-if (rising_edge(mkSelection) AND (ins = "001" OR ins = "010" OR ins = "100") AND e = '1') then
+if (rising_edge(mkSelection) AND e = '1') then
 	if ins = "001" then
 		f <= "01";
 	elsif ins = "010" then
