@@ -6,3 +6,4 @@ output_files
 *.qws
 Quartus/*.txt
 Quartus/simulation
+modelsim
