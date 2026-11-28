@@ -236,6 +236,10 @@ set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_RO
 set_global_assignment -name PARTITION_COLOR 16764057 -entity de10 -section_id Top
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -entity de10 -section_id Top
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name VHDL_FILE testbenches/simulEvents_tb.vhd
+set_global_assignment -name VHDL_FILE testbenches/plrTurns_tb.vhd
+set_global_assignment -name VHDL_FILE testbenches/invalidCodes_tb.vhd
+set_global_assignment -name VHDL_FILE testbenches/bothResets_tb.vhd
 set_global_assignment -name VHDL_FILE testbenches/heldButtons_tb.vhd
 set_global_assignment -name VHDL_FILE testbenches/winTie_tb.vhd
 set_global_assignment -name VHDL_FILE testbenches/speedGen_tb.vhd
