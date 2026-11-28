@@ -32,17 +32,31 @@ COMPONENT PreScale IS
 
 	--DUT signals required
 	SIGNAL tb_clock : std_logic := '1'; --DUT's clock input. Assign the clock a starting value for Modelsim
-	SIGNAL tb_e : std_logic := '0';
-	SIGNAL tb_ins : std_logic_vector(2 downto 0) := "000";
-	SIGNAL tb_mk : std_logic := '0';
-	SIGNAL tb_f : std_logic_vector(1 downto 0);
-	SIGNAL tb_easy, tb_med, tb_hard : std_logic; --PreScale outputs for speed 01, 10, 11
+	SIGNAL tb_e : std_logic := '1';
+	SIGNAL tb_ins : std_logic_vector(2 downto 0) := "001"; -- speed code
+	SIGNAL tb_mk : std_logic := '0'; -- move speed code to 2 bit selection
+	SIGNAL tb_f : std_logic_vector(1 downto 0); --speed selection to 2 bit code
+	SIGNAL tb_speed : std_logic; --PreScale output for speed
 	
 	BEGIN
 	
-		DUT : getSpeed PORT MAP(tb_e, tb_ins, tb_mk, tb_f);
-		DUT_E : PreScale PORT MAP(tb_clock, tb_f, tb_easy);
+		DUT : getSpeed PORT MAP(tb_e,tb_ins , tb_mk, tb_f);
+		DUT_E : PreScale PORT MAP(tb_clock, tb_f, tb_speed);
 
-		tb_clock <= NOT tb_clock after clk_period / 2;
+		tb_clock <= NOT tb_clock after clk_period;
+
+	process(tb_ins)
+		begin
+			if tb_ins = "100" then
+				tb_ins <= "001" after clk_period * 2;
+			elsif tb_ins = "001" then
+				tb_ins <= "010" after clk_period * 2;
+			elsif tb_ins = "010" then
+				tb_ins <= "100" after clk_period * 2;
+			end if;
+	end process;
+
+		tb_mk <= NOT tb_mk after clk_period;
+
 
 END Behaviour;
