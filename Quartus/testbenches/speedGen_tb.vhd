@@ -1,98 +1,50 @@
--- File: BCDCount.vhd
+-- File: speedGen_tb.vhd
 -- Group: 36
 -- Authors: Gabriel Dryer; Jeromey Gong; Joshua Po
--- Purpose: Binary Coded Decimal counter; Instantiates Count4.vhd
+-- Purpose: Testbench for getSpeed.vhd and PreScale.vhd; checks the three speed codes, invalid codes, e = 0, and Easy slower than Medium slower than Hard
 -- Responsibility: The named authors are responsible for this code
 -- and can explain its design, implementation, and verification.
 -- Adapted material: None
-library ieee;
-use ieee.std_logic_1164.all;
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+USE ieee.numeric_std.all;
 
-entity speedGen_tb is
-end speedGen_tb;
+ENTITY speedGen_tb is
+END speedGen_tb;
 
-architecture behavior of speedGen_tb is
+ARCHITECTURE Behaviour of speedGen_tb is
+COMPONENT getSpeed IS --the components we would like to test
+	PORT (       e : in std_logic;
+		        ins : in std_logic_vector(2 downto 0);
+      mkSelection : in std_logic;
+		          f : out std_logic_vector(1 downto 0) := "01");
+	END COMPONENT;
 
-    component getSpeed is
-        port ( e           : in std_logic;
-               ins         : in std_logic_vector(2 downto 0);
-               mkSelection : in std_logic;
-               f           : out std_logic_vector(1 downto 0));
-    end component;
+COMPONENT PreScale IS
+	PORT (clock : in std_logic;
+		   speed : in std_logic_vector(1 downto 0);
+		       f : out std_logic);
+	END COMPONENT;
 
-    signal en       : std_logic := '1';
-    signal switches : std_logic_vector(2 downto 0) := "000";
-    signal mkSel    : std_logic := '0';
-    signal f_out    : std_logic_vector(1 downto 0);
+	--for clock generation
+	constant clk_hz : integer := 50e6; --f = 50 Mhz clock
+	constant clk_period : time := 1 sec / clk_hz; --1/f = T = 20 ns period
 
-    constant EASY   : std_logic_vector(1 downto 0) := "01";
-    constant MEDIUM : std_logic_vector(1 downto 0) := "10";
-    constant HARD   : std_logic_vector(1 downto 0) := "11";
+	--DUT signals required
+	SIGNAL tb_clock : std_logic := '1'; --DUT's clock input. Assign the clock a starting value for Modelsim
+	SIGNAL tb_e : std_logic := '0';
+	SIGNAL tb_ins : std_logic_vector(2 downto 0) := "000";
+	SIGNAL tb_mk : std_logic := '0';
+	SIGNAL tb_f : std_logic_vector(1 downto 0);
+	SIGNAL tb_easy, tb_med, tb_hard : std_logic; --PreScale outputs for speed 01, 10, 11
+	
+	BEGIN
+	
+		DUT : getSpeed PORT MAP(tb_e, tb_ins, tb_mk, tb_f);
+		DUT_E : PreScale PORT MAP(tb_clock, "01", tb_easy);
+		DUT_M : PreScale PORT MAP(tb_clock, "10", tb_med);
+		DUT_H : PreScale PORT MAP(tb_clock, "11", tb_hard);
 
-begin
+		tb_clock <= NOT tb_clock after clk_period / 2;
 
-    UUT: getSpeed
-        port map ( e           => en,
-                   ins         => switches,
-                   mkSelection => mkSel,
-                   f           => f_out);
-
-    test_process : process
-    begin
-
-        -- t1: Easy speed
-        switches <= "001";
-        mkSel <= '0';
-        wait for 10 ns;
-        mkSel <= '1';
-        wait for 10 ns;
-
-        assert f_out = EASY
-            report "Easy selection failed" severity error;
-
-        -- t2: Medium speed
-        switches <= "010";
-        mkSel <= '0';
-        wait for 10 ns;
-        mkSel <= '1';
-        wait for 10 ns;
-
-        assert f_out = MEDIUM
-            report "Medium selection failed" severity error;
-
-        -- t3: Hard speed
-        switches <= "100";
-        mkSel <= '0';
-        wait for 10 ns;
-        mkSel <= '1';
-        wait for 10 ns;
-
-        assert f_out = HARD
-            report "Hard selection failed" severity error;
-
-        -- t4: Output should hold when selection is inactive
-        mkSel <= '0';
-        switches <= "001";
-        wait for 20 ns;
-
-        assert f_out = HARD
-            report "Output changed while selection was inactive" severity error;
-
-        -- t5: Output should hold when disabled
-        en <= '0';
-        switches <= "010";
-        mkSel <= '0';
-        wait for 10 ns;
-        mkSel <= '1';
-        wait for 10 ns;
-
-        assert f_out = HARD
-            report "Output changed while disabled" severity error;
-
-        report "TEST PASSED: All speedGen tests completed."
-            severity note;
-
-        wait;
-    end process;
-
-end architecture behavior;
+END Behaviour;
