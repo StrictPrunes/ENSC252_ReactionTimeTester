@@ -1,7 +1,7 @@
--- File: BCDCount.vhd
+-- File: simulEvents_tb.vhd
 -- Group: 36
 -- Authors: Gabriel Dryer; Jeromey Gong; Joshua Po
--- Purpose: Binary Coded Decimal counter; Instantiates Count4.vhd
+-- Purpose: Testbench for simultaneous events using plrStates.vhd and reactionStart.vhd; priority is Hard Reset > Soft Reset > Stop > sequence update
 -- Responsibility: The named authors are responsible for this code
 -- and can explain its design, implementation, and verification.
 -- Adapted material: None
@@ -9,37 +9,49 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
 
-ENTITY Fcount_tb is
-END Fcount_tb;
+ENTITY simulEvents_tb is
+END simulEvents_tb;
 
-ARCHITECTURE Behaviour of Fcount_tb is
-COMPONENT Fcount IS --the component we would like to test
-	PORT (clock, reset : in std_logic;
-		D : in std_logic_vector(3 downto 0);
-		f : out unsigned(5 downto 0));
+ARCHITECTURE Behaviour of simulEvents_tb is
+COMPONENT plrStates IS --the components we would like to test
+	PORT (e : in std_logic_vector(2 downto 0);
+		nextState : in std_logic;
+		BCDIn : in std_logic_vector(3 downto 0);
+		hardReset : in std_logic;
+		softReset : in std_logic;
+	   LED : out std_logic_vector(7 downto 0);
+		running : out std_logic;
+		currPLr : out std_logic_vector(1 downto 0);
+	   plr1 : out std_logic_vector(3 downto 0);
+	   plr2 : out std_logic_vector(3 downto 0));
+	END COMPONENT;
+
+COMPONENT reactionStart IS
+	PORT (e : in std_logic;
+		clock : in std_logic;
+		running : in std_logic;
+		plrOut : out std_logic_vector(3 downto 0));
 	END COMPONENT;
 
 	--for clock generation
-	constant clk_hz : integer := 50e6; --f = 50 Mhz clock
-	constant clk_period : time := 1 sec / clk_hz; --1/f = T = 20 ns period
+	constant dig_period : time := 200 ns;
 
 	--DUT signals required
-	SIGNAL tb_f : UNSIGNED(5 downto 0);
-	SIGNAL tb_clock : std_logic := '1'; --DUT's clock input. Assign the clock a starting value for Modelsim
-	SIGNAL tb_reset : std_logic := '1';
-	SIGNAL tb_d : UNSIGNED(3 downto 0) := "0001";
+	SIGNAL tb_clock : std_logic := '0';
+	SIGNAL tb_key : std_logic := '0'; --KEY(0)
+	SIGNAL tb_hard : std_logic := '0'; --Hard Reset
+	SIGNAL tb_soft : std_logic := '0'; --Soft Reset
+	SIGNAL tb_code : std_logic_vector(2 downto 0) := "001";
+	SIGNAL tb_state : std_logic_vector(7 downto 0);
+	SIGNAL tb_running : std_logic;
+	SIGNAL tb_curr : std_logic_vector(1 downto 0);
+	SIGNAL tb_digit, tb_p1, tb_p2 : std_logic_vector(3 downto 0);
 	
 	BEGIN
 	
-		DUT : Fcount
-		PORT MAP(tb_clock, tb_reset, STD_LOGIC_VECTOR(tb_d), tb_f);
+		DUT : plrStates PORT MAP(tb_code, tb_key, tb_digit, tb_hard, tb_soft, tb_state, tb_running, tb_curr, tb_p1, tb_p2);
+		DUT2 : reactionStart PORT MAP('1', tb_clock, tb_running, tb_digit);
 
-		--Simple assignment statement that inverts the clock ever clk_period/2 to create 
-		--a constant clock signal for our simulations
-		tb_clock <= NOT tb_clock after clk_period / 2;
-		tb_reset <= NOT tb_reset after clk_period * 3;
-		tb_d <= tb_d + 1 after clk_period * 3;
-		
-		
+		tb_clock <= NOT tb_clock after dig_period / 2;
 
 END Behaviour;
