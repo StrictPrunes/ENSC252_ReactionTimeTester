@@ -41,9 +41,7 @@ COMPONENT PreScale IS
 	BEGIN
 	
 		DUT : getSpeed PORT MAP(tb_e, tb_ins, tb_mk, tb_f);
-		DUT_E : PreScale PORT MAP(tb_clock, "01", tb_easy);
-		DUT_M : PreScale PORT MAP(tb_clock, "10", tb_med);
-		DUT_H : PreScale PORT MAP(tb_clock, "11", tb_hard);
+		DUT_E : PreScale PORT MAP(tb_clock, tb_f, tb_easy);
 
 		tb_clock <= NOT tb_clock after clk_period / 2;
 
